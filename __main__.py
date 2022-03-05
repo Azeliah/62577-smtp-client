@@ -3,7 +3,8 @@ Initial python code.
 Example of commenting
 """
 
-main():
+
+def main():
     message1 = 'Hello'
     message2 = 'World!'
     # String concatenation in Python
