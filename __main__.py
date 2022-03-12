@@ -2,10 +2,26 @@
 Initial python code.
 Example of commenting
 """
+import socket
+# import re
 from socket import *
+# import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+# EMAIL: IDENTIFIER AT DOMAIN TLD
+# TLD: [a-zA-Z]+
+# DOMAIN: (([a-zA-Z0-9]+ (['-'|'_'][a-zA-Z]+)?)+ '.')+
+# AT: '@'
+# IDENTIFIER: ([a-zA-Z0-9]+ ['.'|'-'|'_'|'+']?)+
+# ([a-zA-Z0-9]+ ['.'|'-'|'_'|'+']?)+ '@'(([a-zA-Z0-9]+ (['-'|'_'][a-zA-Z]+)?)+ '.')+ [a-zA-Z]+
+# abcd   @  abc.com
+# ab.cd  @  abc.com
+# 1_2-3.a-b.c-d@a-b.c-d.co.uk
+
+
+# def verify_email(email):
+
 
 
 def get_mail_strings():
@@ -66,11 +82,21 @@ def main():
 
     mail_server = 'smtp2.bhsi.xyz'
     server_port = 2525
-
     msg_lines = string_split(msg.as_string(), '\0')
 
     print(msg_lines)
     # Establish TCP connection to mail_server
+    """
+    test_sock = socket(AF_INET, SOCK_STREAM)
+    context = ssl.create_default_context()
+
+    with test_sock.create_connection((mail_server, 443)) as sock:
+        with context.wrap_socket(sock, server_hostname=mail_server) as ssock:
+            print(ssock.version())
+
+    ssock.connect((mail_server, server_port))
+    """
+
     client_socket = socket(AF_INET, SOCK_STREAM)
     client_socket.connect((mail_server, server_port))
 
