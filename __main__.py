@@ -21,12 +21,7 @@ def get_mail_strings():
         if i == 3:
             while inputs[len(inputs) - 1] != ".":
                 input1 = str(input())
-                """
-                if input1 == ".":)
-                    inputs.append('.')
-                """
                 inputs.append(input1)
-
 
         else:
             inputs.append(str(input()))  # TODO: Add some input validation here.
@@ -67,31 +62,10 @@ def mime_message():
 
 
 def main():
-    # strings = get_mail_strings()
     msg = mime_message()
 
     mail_server = 'smtp2.bhsi.xyz'
     server_port = 2525
-
-    line_terminator = '\r\n'
-
-    # Mail content
-    """
-    ta_email = strings[0]  # 's171242@student.dtu.dk'
-    rcpt_email = strings[1]
-    subject = strings[2]
-    mail_header = ['From: ' + ta_email + '\r\n',
-                   'To: ' + rcpt_email + '\r\n',
-                   'Subject:' + subject + '\r\n',
-                   '\r\n']
-
-    mail_body = []
-
-    for i in range(len(strings) - 3):
-        print(i)
-        mail_body.append(strings[i + 3])
-        mail_body.append(line_terminator)
-    """
 
     msg_lines = string_split(msg.as_string(), '\0')
 
@@ -159,14 +133,6 @@ def main():
     for line in msg_lines:
         client_socket.send(line.encode())
 
-    """
-    for line in mail_header:
-        client_socket.send(line.encode())
-
-    for line in mail_body:
-        client_socket.send(line.encode())
-    """
-
     receive = client_socket.recv(1024).decode()
 
     if receive[:3] != '250':
@@ -175,16 +141,7 @@ def main():
         return
 
     print("Mail body successfully sent to mailserver.")
-    """
-    client_socket.send('QUIT\r\n'.encode())
 
-    receive = client_socket.recv(1024).decode()
-
-    if receive[:3] != '221':
-        print('221 reply not received from server.')
-        client_socket.close()
-        return
-    """
     print("Ended session with mailserver, closing socket.")
 
     client_socket.close()
