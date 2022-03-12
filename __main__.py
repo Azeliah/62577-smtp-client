@@ -28,7 +28,8 @@ def get_mail_strings():
     prompts = ["Sender email (TA email): ",
                "Recipient email (student email): ",
                "Message subject: ",
-               "Message body (finish with a separate line with a single period): "]
+               "Message body (finish with a separate line with a single period): ",
+               "Attachment (filepath, or enter blank for no attachment): "]
 
     inputs = []
 
@@ -50,19 +51,24 @@ def string_split(text, delimiter):
 
 
 def mime_message():
-    img_filepath = 'verification_screenshot.jpg'
-    with open(img_filepath, 'rb') as f:
-        img_data = f.read()
-
     strings = get_mail_strings()
+    img_filepath = strings[len(strings) - 1]
+    try:
+        with open(img_filepath, 'rb') as f:
+            img_data = f.read()
+    except FileNotFoundError:
+        print('File cannot be found - no attachment included in email')
+        img_data = None
+
     msg = MIMEMultipart()
     msg['From'] = strings[0]
     msg['To'] = strings[1]
     msg['Subject'] = strings[2]
 
-    jpg_part = MIMEApplication(img_data)
-    jpg_part.add_header('Content-Disposition', 'attachment', filename='proof.jpg')
-    msg.attach(jpg_part)
+    if img_data != None:
+        jpg_part = MIMEApplication(img_data)
+        jpg_part.add_header('Content-Disposition', 'attachment', filename='proof.jpg')
+        msg.attach(jpg_part)
 
     msg_body = ''
     for i in range(len(strings) - 3):
