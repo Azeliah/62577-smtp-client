@@ -4,11 +4,13 @@ Example of commenting
 """
 import socket
 # import re
+import ssl
 from socket import *
 # import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+import base64
 # EMAIL: IDENTIFIER AT DOMAIN TLD
 # TLD: [a-zA-Z]+
 # DOMAIN: (([a-zA-Z0-9]+ (['-'|'_'][a-zA-Z]+)?)+ '.')+
@@ -71,11 +73,9 @@ def mime_message():
         msg.attach(jpg_part)
 
     msg_body = ''
-    for i in range(len(strings) - 3):
-        if i != len(strings) - 3:
+    for i in range(len(strings) - 5):
+        if i != len(strings) - 5:
             msg_body = msg_body + strings[i + 3] + '\r\n\0'
-        else:
-            msg_body = msg_body + strings[i + 3] + '\r\n'
 
     text = MIMEText(msg_body)
     msg.attach(text)
@@ -85,12 +85,12 @@ def mime_message():
 
 def main():
     msg = mime_message()
+    print(msg)
 
-    mail_server = 'smtp2.bhsi.xyz'
-    server_port = 2525
+    mail_server = 'smtp.gmail.com' # 'smtp2.bhsi.xyz'
+    server_port = 587 # 2525
     msg_lines = string_split(msg.as_string(), '\0')
 
-    print(msg_lines)
     # Establish TCP connection to mail_server
     """
     test_sock = socket(AF_INET, SOCK_STREAM)
@@ -128,6 +128,47 @@ def main():
 
     print('SMTP connection successfully established.')
 
+    command = 'STARTTLS\r\n'
+    client_socket.send(command.encode())
+    receive = client_socket.recv(1024).decode()
+    print(receive)
+
+    if receive[:3] != '220':
+        print('220 reply not received from server.')
+        client_socket.close()
+        return
+
+    client_socket = ssl.wrap_socket(client_socket)
+
+    client_socket.send(helo_command.encode())
+    receive = client_socket.recv(1024).decode()
+    print(receive)
+
+    username = 'cxiao2305@gmail.com'
+    pw = 'Group_05'
+    username_base64 = base64.b64encode(username.encode("utf-8"))
+    pw_base64 = base64.b64encode(pw.encode("utf-8"))
+
+    command = 'AUTH LOGIN\r\n'
+    client_socket.send(command.encode())
+    receive = client_socket.recv(1024).decode()
+    print(receive)
+
+    client_socket.send(username_base64)
+    client_socket.send('\r\n'.encode())
+    receive = client_socket.recv(1024).decode()
+    print(receive)
+
+    client_socket.send(pw_base64)
+    client_socket.send('\r\n'.encode())
+    receive = client_socket.recv(1024).decode()
+    print(receive)
+
+    if receive[:3] != '235':
+        print('235 reply not received from server.')
+        client_socket.close()
+        return
+
     mail_from_command = 'MAIL FROM:<' + msg['From'] + '>\r\n'
 
     client_socket.send(mail_from_command.encode())
@@ -163,7 +204,9 @@ def main():
         return
 
     for line in msg_lines:
-        client_socket.send(line.encode())
+       client_socket.send(line.encode())
+    client_socket.send("\r\n".encode())
+    client_socket.send(".\r\n".encode())
 
     receive = client_socket.recv(1024).decode()
 
