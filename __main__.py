@@ -206,7 +206,7 @@ def main():
         return
 
     for line in msg_lines:
-       client_socket.send(line.encode())
+        client_socket.send(line.encode())
     client_socket.send("\r\n".encode())
     client_socket.send(".\r\n".encode())
 
