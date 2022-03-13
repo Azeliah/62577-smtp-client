@@ -75,7 +75,7 @@ def mime_message():
     text = MIMEText(msg_body)
     msg.attach(text)
 
-    if img_data != None:
+    if img_data is not None:
         jpg_part = MIMEApplication(img_data)
         jpg_part.add_header('Content-Disposition', 'attachment', filename = os.path.basename(img_filepath))
         msg.attach(jpg_part)
