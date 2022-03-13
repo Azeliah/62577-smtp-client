@@ -70,8 +70,7 @@ def mime_message():
 
     msg_body = ''
     for i in range(len(strings) - 5):
-        if i != len(strings) - 5:
-            msg_body = msg_body + strings[i + 3] + '\r\n\0'
+        msg_body = msg_body + strings[i + 3] + '\r\n\0'
 
     text = MIMEText(msg_body)
     msg.attach(text)
@@ -129,8 +128,8 @@ def main():
 
     print('SMTP connection successfully established.')
 
-    command = 'STARTTLS\r\n'
-    client_socket.send(command.encode())
+    TLS_command = 'STARTTLS\r\n'
+    client_socket.send(TLS_command.encode())
     receive = client_socket.recv(1024).decode()
     print(receive)
 
@@ -147,8 +146,8 @@ def main():
 
     username = 'cxiao2305@gmail.com'
     pw = 'Group_05'
-    username_base64 = base64.b64encode(username.encode("utf-8"))
-    pw_base64 = base64.b64encode(pw.encode("utf-8"))
+    username_base64 = base64.b64encode(username.encode("ascii"))
+    pw_base64 = base64.b64encode(pw.encode("ascii"))
 
     command = 'AUTH LOGIN\r\n'
     client_socket.send(command.encode())
