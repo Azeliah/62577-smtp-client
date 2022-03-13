@@ -2,7 +2,7 @@
 Initial python code.
 Example of commenting
 """
-import os
+import os.path
 import socket
 # import re
 from socket import *
@@ -66,7 +66,7 @@ def mime_message():
     msg['To'] = strings[1]
     msg['Subject'] = strings[2]
 
-    if img_data != None:
+    if img_data is not None:
         jpg_part = MIMEApplication(img_data)
         jpg_part.add_header('Content-Disposition', 'attachment', filename=os.path.basename(img_filepath))
         msg.attach(jpg_part)
