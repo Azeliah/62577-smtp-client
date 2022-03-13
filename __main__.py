@@ -65,11 +65,6 @@ def mime_message():
     msg['To'] = strings[1]
     msg['Subject'] = strings[2]
 
-    if img_data != None:
-        jpg_part = MIMEApplication(img_data)
-        jpg_part.add_header('Content-Disposition', 'attachment', filename='proof.jpg')
-        msg.attach(jpg_part)
-
     msg_body = ''
     for i in range(len(strings) - 3):
         if i != len(strings) - 3:
@@ -79,6 +74,12 @@ def mime_message():
 
     text = MIMEText(msg_body)
     msg.attach(text)
+
+    if img_data != None:
+        jpg_part = MIMEApplication(img_data)
+        img_name = img_filepath.split('\\')
+        jpg_part.add_header('Content-Disposition', 'attachment', filename = img_name[len(img_name)-1])
+        msg.attach(jpg_part)
 
     return msg
 
