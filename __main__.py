@@ -86,10 +86,12 @@ def mime_message():
 def main():
     msg = mime_message()
     print(msg)
+    msg_lines = string_split(msg.as_string(), '\0')
 
     mail_server = 'smtp.gmail.com' # 'smtp2.bhsi.xyz'
     server_port = 587 # 2525
-    msg_lines = string_split(msg.as_string(), '\0')
+    username = 'cxiao2305@gmail.com'
+    pw = 'Group_05'
 
     # Establish TCP connection to mail_server
     """
@@ -128,6 +130,7 @@ def main():
 
     print('SMTP connection successfully established.')
 
+    # Establish TLS connection
     TLS_command = 'STARTTLS\r\n'
     client_socket.send(TLS_command.encode())
     receive = client_socket.recv(1024).decode()
@@ -144,15 +147,14 @@ def main():
     receive = client_socket.recv(1024).decode()
     print(receive)
 
-    username = 'cxiao2305@gmail.com'
-    pw = 'Group_05'
-    username_base64 = base64.b64encode(username.encode("ascii"))
-    pw_base64 = base64.b64encode(pw.encode("ascii"))
-
+    # Authenticate
     command = 'AUTH LOGIN\r\n'
     client_socket.send(command.encode())
     receive = client_socket.recv(1024).decode()
     print(receive)
+
+    username_base64 = base64.b64encode(username.encode("ascii"))
+    pw_base64 = base64.b64encode(pw.encode("ascii"))
 
     client_socket.send(username_base64)
     client_socket.send('\r\n'.encode())
