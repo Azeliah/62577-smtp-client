@@ -7,11 +7,12 @@ import socket
 # import re
 import ssl
 from socket import *
-# import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import base64
+
+
 # EMAIL: IDENTIFIER AT DOMAIN TLD
 # TLD: [a-zA-Z]+
 # DOMAIN: (([a-zA-Z0-9]+ (['-'|'_'][a-zA-Z]+)?)+ '.')+
@@ -23,10 +24,9 @@ import base64
 # 1_2-3.a-b.c-d@a-b.c-d.co.uk
 
 
-# def verify_email(email):
+# def verify_email(email: str):
 
-
-
+# Prompt the user for a series of inputs, constituting a full email.
 def get_mail_strings():
     prompts = ["Sender email (TA email): ",
                "Recipient email (student email): ",
@@ -68,6 +68,7 @@ def mime_message():
     msg['To'] = strings[1]
     msg['Subject'] = strings[2]
 
+    # Include line breaks for transmission of separate lines.
     msg_body = ''
     for i in range(len(strings) - 5):
         msg_body = msg_body + strings[i + 3] + '\r\n\0'
@@ -77,7 +78,7 @@ def mime_message():
 
     if img_data is not None:
         jpg_part = MIMEApplication(img_data)
-        jpg_part.add_header('Content-Disposition', 'attachment', filename = os.path.basename(img_filepath))
+        jpg_part.add_header('Content-Disposition', 'attachment', filename=os.path.basename(img_filepath))
         msg.attach(jpg_part)
 
     return msg
@@ -85,43 +86,30 @@ def mime_message():
 
 def main():
     msg = mime_message()
-    print(msg)
     msg_lines = string_split(msg.as_string(), '\0')
 
-    mail_server = 'smtp.gmail.com' # 'smtp2.bhsi.xyz'
-    server_port = 587 # 2525
+    # Mail server, port, credentials
+    mail_server = 'smtp.gmail.com'
+    server_port = 587  # Port 587 is used for TLS. For connecting to 'smtp2.bhsi.xyz' we use port 2525.
     username = 'cxiao2305@gmail.com'
     pw = 'Group_05'
 
     # Establish TCP connection to mail_server
-    """
-    test_sock = socket(AF_INET, SOCK_STREAM)
-    context = ssl.create_default_context()
-
-    with test_sock.create_connection((mail_server, 443)) as sock:
-        with context.wrap_socket(sock, server_hostname=mail_server) as ssock:
-            print(ssock.version())
-
-    ssock.connect((mail_server, server_port))
-    """
-
     client_socket = socket(AF_INET, SOCK_STREAM)
     client_socket.connect((mail_server, server_port))
 
     receive = client_socket.recv(1024).decode()
-    print(receive)
 
     if receive[:3] != '220':
         print('220 reply not received from server.')
         client_socket.close()
         return
 
-    helo_command = 'EHLO Notalice\r\n'
+    ehlo_command = 'EHLO Notalice\r\n'  # EHLO for Extended SMTP
 
-    client_socket.send(helo_command.encode())
+    client_socket.send(ehlo_command.encode())
 
     receive = client_socket.recv(1024).decode()
-    print(receive)
 
     if receive[:3] != '250':
         print('250 reply not received from server.')
@@ -131,10 +119,10 @@ def main():
     print('SMTP connection successfully established.')
 
     # Establish TLS connection
+    # Source: https://stackoverflow.com/questions/12854572/connect-to-smtp-ssl-or-tls-using-python
     TLS_command = 'STARTTLS\r\n'
     client_socket.send(TLS_command.encode())
     receive = client_socket.recv(1024).decode()
-    print(receive)
 
     if receive[:3] != '220':
         print('220 reply not received from server.')
@@ -143,28 +131,24 @@ def main():
 
     client_socket = ssl.wrap_socket(client_socket)
 
-    client_socket.send(helo_command.encode())
-    receive = client_socket.recv(1024).decode()
-    print(receive)
+    client_socket.send(ehlo_command.encode())
+    client_socket.recv(1024).decode()
 
     # Authenticate
     command = 'AUTH LOGIN\r\n'
     client_socket.send(command.encode())
-    receive = client_socket.recv(1024).decode()
-    print(receive)
+    client_socket.recv(1024).decode()
 
     username_base64 = base64.b64encode(username.encode("ascii"))
     pw_base64 = base64.b64encode(pw.encode("ascii"))
 
     client_socket.send(username_base64)
     client_socket.send('\r\n'.encode())
-    receive = client_socket.recv(1024).decode()
-    print(receive)
+    client_socket.recv(1024).decode()
 
     client_socket.send(pw_base64)
     client_socket.send('\r\n'.encode())
     receive = client_socket.recv(1024).decode()
-    print(receive)
 
     if receive[:3] != '235':
         print('235 reply not received from server.')
@@ -176,7 +160,6 @@ def main():
     client_socket.send(mail_from_command.encode())
 
     receive = client_socket.recv(1024).decode()
-    print(receive)
 
     if receive[:3] != '250':
         print('250 reply not received from server.')
@@ -188,7 +171,6 @@ def main():
     client_socket.send(rcpt_command.encode())
 
     receive = client_socket.recv(1024).decode()
-    print(receive)
 
     if receive[:3] != '250':
         print('250 reply not received from server.')
@@ -198,7 +180,6 @@ def main():
     client_socket.send('DATA\r\n'.encode())
 
     receive = client_socket.recv(1024).decode()
-    print(receive)
 
     if receive[:3] != '354':
         print('354 reply not received from server.')
@@ -217,7 +198,7 @@ def main():
         client_socket.close()
         return
 
-    print("Mail body successfully sent to mailserver.")
+    print("Mail successfully sent to mailserver.")
 
     print("Ended session with mailserver, closing socket.")
 
