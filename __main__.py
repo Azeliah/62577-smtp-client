@@ -1,7 +1,3 @@
-"""
-Initial python code.
-Example of commenting
-"""
 import os.path
 import socket
 # import re
@@ -203,7 +199,3 @@ def main():
     print("Ended session with mailserver, closing socket.")
 
     client_socket.close()
-
-
-if __name__ == "__main__":
-    main()
