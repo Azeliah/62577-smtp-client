@@ -13,7 +13,6 @@ import base64
 dot = r'\.'
 dot_dash = dot + r'|-'
 non_symbol = '[A-Za-z0-9]+'
-domain_symbol = r'[' + dot_dash + r']'
 
 
 def verify_email(email: str):
@@ -37,6 +36,7 @@ def verify_local(string: str):
 
 
 def verify_domain(string: str):
+    domain_symbol = r'[' + dot_dash + r']'
     domain_regex = non_symbol + r'(' + domain_symbol + '{1}' + non_symbol + r')*'
     tld_regex = non_symbol + r'(' + dot + r'{1}' + non_symbol + r')*'
     full_regex = domain_regex + r'(' + dot + tld_regex + r'){1}'
