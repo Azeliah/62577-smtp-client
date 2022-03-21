@@ -1,6 +1,6 @@
 import os.path
 import socket
-# import re
+import re
 import ssl
 from socket import *
 from email.mime.multipart import MIMEMultipart
@@ -8,19 +8,44 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import base64
 
+# RegEx strings
 
-# EMAIL: IDENTIFIER AT DOMAIN TLD
-# TLD: [a-zA-Z]+
-# DOMAIN: (([a-zA-Z0-9]+ (['-'|'_'][a-zA-Z]+)?)+ '.')+
-# AT: '@'
-# IDENTIFIER: ([a-zA-Z0-9]+ ['.'|'-'|'_'|'+']?)+
-# ([a-zA-Z0-9]+ ['.'|'-'|'_'|'+']?)+ '@'(([a-zA-Z0-9]+ (['-'|'_'][a-zA-Z]+)?)+ '.')+ [a-zA-Z]+
-# abcd   @  abc.com
-# ab.cd  @  abc.com
-# 1_2-3.a-b.c-d@a-b.c-d.co.uk
+dot = r'\.'
+dot_dash = dot + r'|-'
+non_symbol = '[A-Za-z0-9]+'
+domain_symbol = r'[' + dot_dash + r']'
 
 
-# def verify_email(email: str):
+def verify_email(email: str):
+    inputs = re.split(string=email, pattern='@')
+    if len(inputs) != 2:
+        return False
+    if verify_local(inputs[0]) and verify_domain(inputs[1]):
+        return True
+    else:
+        return False
+
+
+def verify_local(string: str):
+    local_symbol = r'[!|#|$|%|&|\'|*|+|-|/|=|\?|^|_|`|\{|\||\}|~' + dot_dash + r']{1}'
+    local_regex = non_symbol + r'(' + local_symbol + non_symbol + r')*'
+    regex = re.compile(local_regex)
+    if re.fullmatch(regex, string):
+        return True
+    else:
+        return False
+
+
+def verify_domain(string: str):
+    domain_regex = non_symbol + r'(' + domain_symbol + '{1}' + non_symbol + r')*'
+    tld_regex = non_symbol + r'(' + dot + r'{1}' + non_symbol + r')*'
+    full_regex = domain_regex + r'(' + dot + tld_regex + r'){1}'
+    regex = re.compile(full_regex)
+    if re.fullmatch(regex, string):
+        return True
+    else:
+        return False
+
 
 # Prompt the user for a series of inputs, constituting a full email.
 def get_mail_strings():
@@ -34,13 +59,23 @@ def get_mail_strings():
 
     for i in range(len(prompts)):
         print(prompts[i])
-        if i == 3:
+        if i < 2:
+            email_verified = False
+            while not email_verified:
+                email_input = str(input())
+                email_verified = verify_email(email_input)
+                if email_verified:
+                    inputs.append(email_input)
+                else:
+                    print("Email address has the wrong format, try again.")
+                    print('Please try again.\n', prompts[i])
+        elif i == 3:
             while inputs[len(inputs) - 1] != ".":
                 input1 = str(input())
                 inputs.append(input1)
 
         else:
-            inputs.append(str(input()))  # TODO: Add some input validation here.
+            inputs.append(str(input()))
 
     return inputs
 
@@ -199,3 +234,48 @@ def main():
     print("Ended session with mailserver, closing socket.")
 
     client_socket.close()
+
+
+if __name__ == '__main__':
+    """
+    # The following tests the RegEx.
+    test_cases_local = [
+        ["s123456", True],
+        ["s.123456", True],
+        ["s.1!2#3$4%5&6'7*8+9-0/1=2?3^4_5`6{7|8}9~0", True],
+        [".s123456", False],
+        ["s..123456", False],
+        ["s123456.", False],
+        ["", False]
+    ]
+
+    test_cases_domain = [
+        ["dtu.dk", True],
+        ["student.dtu.dk", True],
+        ["student..dtu.dk", False],
+        ["student-dtu.dk", True],
+        ["student.dtu..dk", False],
+        ["student--dtu.dk", False],
+        ["dtudk", False],
+        [".dk", False],
+        ["dtu.", False],
+        ["", False],
+        [".", False],
+        [".dtu.dk", False],
+        ["-dtu.dk", False],
+        ["student.dtu.com", True],
+        ["s@tudent.dtu.dk", False]
+    ]
+    
+    result = []
+    
+    for local_string, local_bool in test_cases_local:
+        for domain_string, domain_bool in test_cases_domain:
+            email_string = local_string + '@' + domain_string
+            regex_result = verify_email(email_string)
+            result.append([email_string, regex_result, local_bool and domain_bool])
+
+    for email_string, regex_result, expected in result:
+        print(email_string, 'regex says', regex_result, 'and is actually', expected)
+    """
+    main()
